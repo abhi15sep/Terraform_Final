@@ -1,0 +1,1 @@
+1. Upload app-coode and database zip file in  S3 bucket (dfsc-bucket)

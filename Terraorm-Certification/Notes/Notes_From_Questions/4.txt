@@ -1,0 +1,17 @@
+1. Destroy a specific resource in terraform
+terraform destroy -target aws_instance.myec2
+
+2. To see all information of terraform.tfstate file
+terraform show
+
+3. graph:
+terraform graph > graph.dot
+sudo apt-get install graphviz
+cat graph.dot | dot -Tsvg > graph.svg
+
+4. Saving terrafom to a file:
+terraform plan -out=path
+terraform apply "path"
+
+5. Terrafrom output command is used to extract the value of an output variable from the state file.
+> terraform output iam_names

@@ -1,0 +1,110 @@
+Important Pointers for Exam part3:
+++++++++++++++++++++++++++++++++++
+
+Terraform Functions:
+====================
+The terraform language includes a number of built-in functions that you can use to transform and combine values.
+
+> max(5, 12, 9)
+12
+
+The terraform language does not support user-defined functions, and so only the functions built into the language are available for use.
+
+Be aware of basic functions like element, lookup
+
+Count and Count Index:
+======================
+The count parameter on resources can simplify configurations and let you scale resources by simply incrementing a number.
+
+In resource block where count is set, an additional count object(count.index) is available in expressions, so that you can modify the configuration of each instance.
+
+resource "aws_iam_user" "lb" {
+	name = "loadbalancer.${count.index}"
+	count = 5
+	path = "/system/"
+} 
+
+Find the issue - Use-Case:
+=========================
+You can expect use-case with the terraform code, and you have to find what should be removed as part of Terraform best practice.
+
+terraform {
+	backend "s3" {
+	  bucket = "mybucket"
+	  key = "path/to/my/key"
+	  region = "us-east-1"
+	  access_key = 123
+	  secret_key = 123456
+	}
+}
+
+Terraform Lock:
+===============
+If supported by your backend, terraform will lock your state for all operations that could write state.
+
+
+Terraform has a force-unlock command to manually unlock the state if unlocking failed.
+
+Usecase - Resources deleted out of Terraform:
+=============================================
+You have created an ec2 instance. Someone has modified the ec2 instance manually. What will happen if you will do terraform plan yet again ?
+
+1. Someone has changed ec2 instance type from t2.micro to t2.large ? (terraform apply)
+2. Someone has terminated the ec2 instance. (terraform apply)
+
+Answer1) Terraform's current state will have t2.large, and the desired state is t2.micro. It will try to change back instance type to t2.micro.
+
+Answer2) Terraform will create new ec2 instance. 
+
+Resource Block:
+===============
+Each resource block describes one or more infrastructure objects, such as virtual networks, compute instances, or higher-level components such as DNS records.
+
+A resource block declares a resource of a given type("aws_instance") with a given local name("web")
+
+resource "aws_instance" "web" {
+	ami = "ami-a1b2c3d4"
+	instance_type = "t2.micro"
+} 
+
+Sentinel:
+========
+Sentinel is a embedded policy-as-code framework integrated with the HashiCorp Enterprise products.
+
+Can be used for various use-cases like:
+1. Verify if ec2 instance has tags.
+2. Verify if s3 bucket has encryption enabled.
+
+terraform plan ----> snntinal checks ----> terraform apply
+
+Sensitive Data in State file:
+=============================
+If you manage any sensitive data with terraform (like database passwords, user passwords or private keys), treat the state itself as sensitive data.
+
+Approaches in such scenaros:
+
+Terrafom cloud always encrypts the state at rest and protects it with TLS in transit. Terraform cloud also knows the identity of the user requesting state and maintains  a history of state changes.
+
+The S3 backend supports encryption at rest when the encrypt option is enabled.
+
+Dealing Configurations in Config:
+================================
+Hard-Coding credentials into any terraform configuration are not recommended, and risks the secret leakage should this file ever be committed to public version control system.
+
+You can store the credentials outside of terraform configuration.
+
+Storing credentials as part of environment variables is also a much better approach then hard coding it in the system.
+
+Remote Backend for Terraform Cloud:
+===================================
+The remote backed stores terraform state and may be used to run operations in terraform cloud.
+
+When using full remote operations, operations like terraform plan or terrafom apply can be executed in terraform's cloud run environment, with log output streaming to the local terminal.
+
+Miscellaneous Pointers:
+=======================
+Terraform does not require go as a prerequisite.
+
+It works well in windows, linux and Mac
+
+Windows server is not mandatory.

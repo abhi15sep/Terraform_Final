@@ -1,0 +1,20 @@
+terraform output
+terraform graph
+terraform state
+terraform console
+
+==================================
+teraform state list
+terraform console
+> <list resource name received from state file>
+
+Testing terraform built-in functions: 
+> join(".",["terraform","acg"]
+
+terraform graph > tf.dot
+sudo apt-get install graphviz
+> cat tf.dot | dot -Tpng -otf.png
+
+===================================
+Ansible syntax check:
+ansible-playbook --synatx-check sample.yaml

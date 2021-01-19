@@ -1,0 +1,116 @@
+1. By default, Terraform uses the "local" backend. You must configure a backend block in order to use any other type of backend.
+
+2. The remote backend stores Terraform state and may be used to run operations in Terraform Cloud.
+
+When using full remote operations, operations like terraform plan or terraform apply can be executed in Terraform Cloud's run environment, with log output streaming to the local terminal.
+
+3. S3 backend support state locking using DynamoDB.
+
+4. Which of the below commands will rename a EC2 instance without destroying and recreating it ?
+terrafrom state mv
+
+5. Use the "terraform providers" command to view the specified version constraints for all providers used in the current configuration.
+
+6. The behavior of any terraform destroy command can be previewed at any time with an equivalent terraform plan -destroy command
+
+terraform destroy command also shows what will be destroyed and ask for confirmation. 
+
+Terraform plan is not applicable here to show you the execution plan as you have not deleted the resources from your configuration file. This is important for the exam.
+
+7. Explanation
+You must explicitly define a provisioner to be a destroy-time provisioner
+
+Creation-Time Provisioners
+
+By default, provisioners run when the resource they are defined within is created. Creation-time provisioners are only run during creation, not during updating or any other lifecycle. They are meant as a means to perform bootstrapping of a system.
+
+If a creation-time provisioner fails, the resource is marked as tainted. A tainted resource will be planned for destruction and recreation upon the next terraform apply. Terraform does this because a failed provisioner can leave a resource in a semi-configured state. Because Terraform cannot reason about what the provisioner does, the only way to ensure proper creation of a resource is to recreate it. This is tainting.
+
+You can change this behavior by setting the on_failure attribute, which is covered in detail below.
+
+»Destroy-Time Provisioners
+
+If when = "destroy" is specified, the provisioner will run when the resource it is defined within is destroyed.
+
+resource "aws_instance" "web" {
+  # ...
+
+  provisioner "local-exec" {
+    when    = "destroy"
+    command = "echo 'Destroy-time provisioner'"
+  }
+}
+Destroy provisioners are run before the resource is destroyed. If they fail, Terraform will error and rerun the provisioners again on the next terraform apply. Due to this behavior, care should be taken for destroy provisioners to be safe to run multiple times.
+
+Destroy-time provisioners can only run if they remain in the configuration at the time a resource is destroyed. If a resource block with a destroy-time provisioner is removed entirely from the configuration, its provisioner configurations are removed along with it and thus the destroy provisioner won't run. To work around this, a multi-step process can be used to safely remove a resource with a destroy-time provisioner:
+
+Update the resource configuration to include count = 0.
+
+Apply the configuration to destroy any existing instances of the resource, including running the destroy provisioner.
+
+Remove the resource block entirely from configuration, along with its provisioner blocks.
+
+Apply again, at which point no further action should be taken since the resources were already destroyed.
+
+This limitation may be addressed in future versions of Terraform. For now, destroy-time provisioners must be used sparingly and with care.
+
+8. Understand the different offerings in Terraform OS, Terraform Cloud and Terraform Enterprise. Terraform Cloud's private module registry helps you share Terraform modules across your organization.
+
+9. When using remote state, state is only ever held in memory when used by Terraform.
+
+10. paid features of Terraform Cloud?
+Sentinal, Cost Estimation, Roles/Team management
+
+============================================================================================================================================================================================
+11. The canonical format may change in minor ways between Terraform versions, so after upgrading Terraform it is recommended to proactively run "terrafom fmt"
+
+12. terraform import command can import resources into modules as well directly into the root of your state.
+
+13. By default, provisioners that fail will also cause the Terraform apply itself to error. How can you change this default behavior within a provisioner?
+
+provisioner "local-exec" {
+	on_failure = "continue"
+}
+
+14. Terraform is built on a plugin-based architecture. All providers and provisioners that are used in Terraform configurations are plugins, even the core types such as AWS and Heroku. Users of Terraform are able to write new plugins in order to support new functionality in Terraform.
+
+15. Terraform is built on a plugin-based architecture. All providers and provisioners that are used in Terraform configurations are plugins, even the core types such as AWS and Heroku. Users of Terraform are able to write new plugins in order to support new functionality in Terraform.
+
+16. Terraform loads variables in the following order, with later sources taking precedence over earlier ones:
+
+Environment variables
+The terraform.tfvars file, if present.
+The terraform.tfvars.json file, if present.
+Any *.auto.tfvars or *.auto.tfvars.json files, processed in lexical order of their filenames.
+Any -var and -var-file options on the command line, in the order they are provided. (This includes variables set by a Terraform Cloud workspace.)
+
+16. IBM Cloud does not have a provider maintained by HashiCorp, although IBM Cloud does maintain their own Terraform provider
+
+17. Terraform automatically converts number and bool values to strings when needed.
+
+18. Re-running init with modules already installed will install the sources for any modules that were added to configuration since the last init, but will not change any already-installed modules. Use -upgrade to override this behavior, updating all modules to the latest available source code.
+
+19. Subcommands that are read-only (such as list) do not write any backup files since they aren't modifying the state.
+
+20. Input variables serve as parameters for a Terraform module, allowing aspects of the module to be customized without altering the module's own source code, and allowing modules to be shared between different configurations
+
+==========================================================================================================================================================================================
+
+21. By default, when you create a new workspace you are automatically switched to it
+
+22. Taint the resource "aws_instance" "baz" resource that lives in module bar which lives in module foo.
+terraform taint module.foo.module.bar.aws_instance.baz
+
+23. Data source attributes are interpolated with the general syntax data.TYPE.NAME.ATTRIBUTE. The interpolation for a resource is the same but without the data. prefix (TYPE.NAME.ATTRIBUTE).
+
+24. Terraform state captures all dependency information, both implicit and explicit.
+
+25. You CAN publish your own modules on the Terraform Registry
+
+26. For larger infrastructures, querying every resource is too slow. Many cloud providers do not provide APIs to query multiple resources at once, and the round trip time for each resource is hundreds of milliseconds. On top of this, cloud providers almost always have API rate limiting so Terraform can only request a certain number of resources in a period of time. Larger users of Terraform make heavy use of the -refresh=false flag as well as the -target flag in order to work around this. In these scenarios, the cached state is treated as the record of truth.
+
+27. Which of the below backends support state locking ?
+azzurerm, s3( locking via DynamoDB), consul, cos, etcdv3, gcs, http(optional locking), kubernetes, manta, OSS(locking via TableStore), pg, swift,  
+
+28. Which of the following connection types are supported by the remote-exec provisioner?
+ssh, winrm

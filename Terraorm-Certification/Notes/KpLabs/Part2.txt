@@ -1,0 +1,134 @@
+Important Pointers for Exam part2:
++++++++++++++++++++++++++++++++++++
+
+Overview of Debugging Terraform:
+================================
+Terraform has detailed logs that can be enabled by setting the TF_LOG environment variable to any value.
+
+You can set TF_LOG to one of the log levels TRACE, DEBUG, INFO, WARN or ERROR to change the verbosity of the logs.
+
+Example:
+TF_LOG=TRACE
+
+To persist logged output, you can set TF_LOG_PATH.
+
+Terraform Import:
+==================
+Terraform is able to import existing infrastracture.
+
+This allows you to take resources that you have created by some other means and bring it under terraform management.
+
+The current implementation of terraform import can only import resources into the state.It does not geneerate configuration.
+
+Because of this, prior to running terraform import, it is necessary to write a resource configuration block manually for the resource, to which the imported object will be mapped.
+
+terraform import aws_instance.myec2 instance-id
+
+Local Values:
+=============
+A local value assigns a name to an expression, allowing it to be used multiple times within a module without repeating it.
+
+The expression of a local value can refer to other locals, but as usual reference cycles are not allowed. That is, a local cannot refer to itself or to a variable that refers (directly or indirectly) to it.
+
+Its recommended to group together logically-related local values into a single block, particularly if they depend on each other.
+
+Overview of data types:
+========================
+1. String - Sequence of unicode characters representing some text, like "hello"
+2. list - Sequential list of values identified by their position. Starts with 0 ["mumbai", "singapore", "usa"]
+3. map - A group of values identified by named labels, like {name="mable", age=45}
+4. number - Example: 20
+
+Terraform Workspaces:
+=====================
+Terraform allows us to have multiple workspaces, with each of the workspaces , we can have a different set of environment variables associated.
+
+Workspaces allows multiple state files of a single configuration.
+
+Example: For project A:
+***********************
+staging : instaance_type = t2.micro
+production : instance_type = m4.large
+
+Terraform modules:
+===================
+We can centralize the terraform resources and can call out from TF files whenever required.
+
+Terraform modules - Root and Child:
+===================================
+Every terraform configuration has atleast one module, known as its root module, which consists of the resources defined in the .tf files in the main working directory.
+
+A module can call other modules, which lets you include the child's module resources into the configuration in a concise way.
+
+A module that includes a module block like this is the calling module of the child module.
+
+module "servers" {
+	source = "./app-cluster"
+	servers = 5
+}
+
+Module - Accesssing output values:
+==================================
+The resources defined in a module are encapsulated, so the calling module cannot access their atttributes directly.
+
+However, the child module can declare output values to selectively export certain values to be accessed by the calling module.
+
+output "instance_ip_addr" {
+	value = aws_instance.server.private_ip
+}
+
+Supressing Values in CLI Output:
+================================
+An output can be marked as containing sensitive material using the optional sensitive argument.
+
+output "db_password" {
+	value = aws_db_instance.db.password
+	description = "The password for logging in to the database"
+	sensitive = true
+}
+
+Setting an output value in the root module as sensitive prevents Terraform from showing its value in the list of outputs at the end of terraform apply.
+
+Sensitive output values are still recorded in the state, and so will be visible to anyone who is able to access the state data.
+
+Module Versions:
+================
+It is recommended to explicitly constraint the acceptable version numbers for each external module to avoid unexpected or unwanted changes.
+
+Version constraints are supported only for modules installed from a module registry, such as the Terraform Registry or Terraform Cloud's private module registry.
+
+module "consul" {
+	source = "hashicorp/consul/aws"
+	version = "0.0.5"
+	servers = 3
+}
+
+Terraform Registry:
+===================
+The terraform registry is integrated directly into terraform.
+
+The syntax for referencing a registry module is:
+<NAMESPACE>/<NAME>/<PROVIDER>
+
+Example: hashicorp/consul/aws
+
+module "consul" {
+	source = "hashicorp/consul/aws"
+	version = "0.1.0"
+}
+
+Private Registry for Module Sources:
+====================================
+You can also use modules from a private registry, like the one provided by Terraform cloud.
+
+Private registry modules have source strings of the following form.
+<HOSTNAME>/<NAMESPACE>/<NAME>/<PROVIDER>
+
+This is the same format as public registry, but with an additional hostname prefix.
+
+While fetching a module, having a version is required.
+
+module "vpc" {
+	source = "app.terraform.io/example_corp/vpc/aws"
+	version = "0.9.3"
+}

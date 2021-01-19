@@ -1,0 +1,98 @@
+1. The format of resource block configurations is as follows:
+<block type> "<resource type>" "<local name/label>"
+
+2. Terraform Cloud supports the following VCS providers:
+  - GitHub
+  - GitHub.com (OAuth)
+  - GitHub Enterprise
+  - GitLab.com
+  - GitLab EE and CE
+  - Bitbucket Cloud
+  - Bitbucket Server
+  - Azure DevOps Server
+  - Azure DevOps Services
+  
+3. It is important to consider that Terraform reads from data sources during the plan phase and writes the result into the plan. For something like a Vault token which has an explicit TTL, the apply must be run before the data, or token, in this case, expires, otherwise, Terraform will fail during the apply phase.
+
+4. HashiCorp style conventions state that you should use 2 spaces between each nesting level to improve the readability of Terraform configurations.
+https://www.terraform.io/docs/configuration/style.html
+
+5. You can use modules from a private registry, like the one provided by Terraform Cloud. Private registry modules have source strings of the form <HOSTNAME>/<NAMESPACE>/<NAME>/<PROVIDER>. This is the same format as the public registry, but with an added hostname prefix.
+
+6. If a resource successfully creates but fails during provisioning, Terraform will error and mark the resource as "tainted". A resource that is tainted has been physically created, but can't be considered safe to use since provisioning failed.
+
+Terraform also does not automatically roll back and destroy the resource during the apply when the failure happens, because that would go against the execution plan: the execution plan would've said a resource will be created, but does not say it will ever be deleted.
+
+7. github is not a supported backend type. https://www.terraform.io/docs/backends/types/index.html
+artifactory
+azurerm
+consul
+cos
+etcd
+etcdv3
+gcs
+http
+kubernetes
+manta
+oss
+pg
+s3
+swift
+terraform enterprise
+
+8. Terraform destroy will always prompt for confirmation before executing unless passed the -auto-approve flag.
+
+9. By default, terraform init downloads plugins into a subdirectory of the working directory, .terraform/plugins,  so that each working directory is self-contained.
+
+10. ~> 1.2.0 will match any non-beta version of the provider between  >= 1.2.0 and < 1.3.0. For example,  1.2.X
+
+11. You can use required_version to ensure that a user deploying infrastructure is using Terraform 0.12 or greater, due to the vast number of changes that were introduced. As a result, many previously written configurations had to be converted or rewritten.
+
+12. The list below contains all the requirements for publishing a module. Meeting the requirements for publishing a module is extremely easy. The list may appear long only to ensure we're detailed, but adhering to the requirements should happen naturally.
+
+GitHub. The module must be on GitHub and must be a public repo. This is only a requirement for the public registry. If you're using a private registry, you may ignore this requirement.
+
+Named terraform-<PROVIDER>-<NAME>. Module repositories must use this three-part name format, where <NAME> reflects the type of infrastructure the module manages and <PROVIDER> is the main provider where it creates that infrastructure. The <NAME> segment can contain additional hyphens. Examples: terraform-google-vault or terraform-aws-ec2-instance.
+
+Repository description. The GitHub repository description is used to populate the short description of the module. This should be a simple one-sentence description of the module.
+
+Standard module structure. The module must adhere to the standard module structure. This allows the registry to inspect your module and generate documentation, track resource usage, parse submodules and examples, and more.
+
+x.y.z tags for releases. The registry uses tags to identify module versions. Release tag names must be a semantic version, which can optionally be prefixed with a v. For example, v1.0.4 and 0.9.2. To publish a module initially, at least one release tag must be present. Tags that don't look like version numbers are ignored.
+
+13. Sentinel and Cost Estimation are both available in Terraform Cloud, though not at the free tier level.
+
+14. Terraform supports the #, //, and /*..*/ for commenting Terraform configuration files. Please use them when writing Terraform so both you and others who are using your code have a full understanding of what the code is intended to do.
+
+15. A Terraform Enterprise install that is provisioned on a network that does not have Internet access is generally known as an air-gapped install. These types of installs require you to pull updates, providers, etc. from external sources vs. being able to download them directly.
+
+16. Terraform is available for macOS, FreeBSD, OpenBSD, Linux, Solaris, Windows
+
+17. Terraform Enterprise currently supports running under the following operating systems for a Clustered deployment:
+
+- Ubuntu 16.04.3 - 16.04.5 / 18.04
+
+- Red Hat Enterprise Linux 7.4 through 7.7
+
+- CentOS 7.4 - 7.7
+
+- Amazon Linux
+
+- Oracle Linux
+
+Clusters currently don't support other Linux variants.
+
+18. Terraform can limit the number of concurrent operations as Terraform walks the graph using the -parallelism=n  argument. The default value for this setting is 10. This setting might be helpful if you're running into API rate limits.
+
+19. By default, Terraform will clone and use the default branch (referenced by HEAD) in the selected repository. You can override this using the ref argument:
+
+module "vpc" {
+  source = "git::https://example.com/vpc.git?ref=v1.2.0"
+}
+The value of the ref argument can be any reference that would be accepted by the git checkout command, including branch and tag names.
+
+20. The terraform workspace new command is used to create a new workspace.
+
+21. zipmap constructs a map from a list of keys and a corresponding list of values. A map is denoted by { } whereas a list is donated by [ ].
+
+22. The terraform console command provides an interactive console for evaluating expressions.
