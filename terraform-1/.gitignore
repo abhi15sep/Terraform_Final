@@ -1,0 +1,9 @@
+**/.terraform/
+**/*.dot
+**/*.plan
+**/terraform.tfstate
+**/terraform.tfstate.backup
+**/.terraform.tfstate.lock.info
+**/terraform.tfvars
+**/*.pub
+**/id_rsa

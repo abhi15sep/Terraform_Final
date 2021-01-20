@@ -1,0 +1,3 @@
+var.aws_instance.ubuntu-vm.private_ip
+172.31.19.45
+aws_instance.ubuntu-vm.private_ip
